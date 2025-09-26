@@ -1,8 +1,10 @@
 <h1 align="center">
-    <img src="./assets/appicon.svg" width="24"> Wallpaper Extractor
+    <img src="./assets/appicon.svg" width="24" alt="App Icon"> Wallpaper Extractor
 </h1>
 
-![Window](./assets/window.png)
+<p align="center">
+    <img src="./assets/window.png" width="400" alt="App Preview">
+</p>
 
 A simple (for now) program that obtains the currently-used wallpaper in Windows.
 

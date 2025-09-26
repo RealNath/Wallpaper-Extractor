@@ -4,6 +4,7 @@ from PyQt6.QtGui import QPixmap
 import os
 import gui
 import util
+import shutil
 
 class MainWindow(QtWidgets.QMainWindow):
 	def __init__(self, parent=None):
@@ -27,12 +28,18 @@ class MainWindow(QtWidgets.QMainWindow):
 			if not pm.isNull():
 				self._orig_pixmap = pm
 				self._update_label_pixmap()
+				self.ui.get_wall_path_btn.setEnabled(True)
+				self.ui.extract_wall_btn.setEnabled(True)
 			else:
 				# Failed to load pixmap from a given path
 				self._show_message("wallLabel", "Failed to load wallpaper image.", f"Failed to load: {path}")
+				self.ui.get_wall_path_btn.setEnabled(False)
+				self.ui.extract_wall_btn.setEnabled(False)
 		else:
 			# Invalid or missing path; show message instead of image
 			self._show_message("wallLabel", "Wallpaper path invalid or not found.")
+			self.ui.get_wall_path_btn.setEnabled(False)
+			self.ui.extract_wall_btn.setEnabled(False)
 
 		# Align image to center
 		self.ui.wallLabel.setAlignment(Qt.AlignmentFlag.AlignHCenter
@@ -79,14 +86,41 @@ class MainWindow(QtWidgets.QMainWindow):
 	# Handle 'Get Current Wallpaper Path' button.
 	def handle_get_wall_path(self):
 		path = util.get_current_wallpaper_path()
-		print(f"[Get Path] Current wallpaper path: {path}")
 		self._show_message("btn_msg_label", f"File path {path} copied to clipboard.")
 		QtWidgets.QApplication.clipboard().setText(path)
 		return path
 
-	# Handle 'Extract Wallpaper' button (placeholder)
+	# Handle 'Extract Wallpaper' button
 	def handle_extract_wallpaper(self):
-		print("[Extract] Extract wallpaper button clicked (placeholder logic).")
+		file_path = util.get_current_wallpaper_path()
+		# Validate source path
+		if not isinstance(file_path, str) or not os.path.isfile(file_path):
+			self._show_message("btn_msg_label", "No valid wallpaper file to extract.")
+			return None
+
+		target_dir = os.path.join(os.getcwd(), "img")
+		os.makedirs(target_dir, exist_ok=True)
+
+		basename = os.path.basename(file_path)
+		name, ext = os.path.splitext(basename)
+
+		# Handles duplicate
+		candidate = basename
+		counter = 2
+		while os.path.exists(os.path.join(target_dir, candidate)):
+			candidate = f"{name} ({counter}){ext}"
+			counter += 1
+
+		dest_path = os.path.join(target_dir, candidate)
+		try:
+			shutil.copy2(file_path, dest_path)
+			self._show_message("btn_msg_label", f"Extracted to img/{candidate}")
+			# print(f"[Extract] Copied wallpaper to {dest_path}")
+			# return dest_path
+		except Exception as e:
+			self._show_message("btn_msg_label", f"Failed to extract: {e}")
+			# print(f"[Extract][Error] {e}")
+			# return None
 
 def main():
 	import sys

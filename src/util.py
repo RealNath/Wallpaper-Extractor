@@ -15,3 +15,9 @@ def get_current_wallpaper_path():
     match = re.search(r"[A-Z]:\\[^\0]+", val_utf16)
     if match: return (match.group(0))
     else: return ("Wallpaper path not found.")
+
+if __name__ == "__main__":
+    import os
+    file_path = get_current_wallpaper_path()
+    print(file_path)
+    print(os.path.basename(file_path))
